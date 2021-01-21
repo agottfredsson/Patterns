@@ -1,18 +1,40 @@
 package shop;
 
+import command.Command;
+import command.CommandManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 
 public class ShoppingCartItem {
+    private CommandManager commandManager;
     private final BigDecimal itemCost;
     private final Product product;
-    private final int quantity;
+    private int quantity;
 
-    public ShoppingCartItem(@NotNull Product product, double itemCost, int quantity) {
+    public ShoppingCartItem(@NotNull Product product, double itemCost, int quantity, CommandManager commandManager) {
+        this.commandManager = commandManager;
         this.itemCost = BigDecimal.valueOf(itemCost);
         this.product = product;
         this.quantity = quantity;
+    }
+
+    public void setQuantity(int newQuantity){
+        int oldQuantity = quantity;
+
+        Command undoCommand = new Command() {
+            @Override
+            public void execute() {
+                quantity = oldQuantity;
+            }
+
+            @Override
+            public void redo() {
+                quantity = newQuantity;
+            }
+        };
+        this.quantity = newQuantity;
+        commandManager.addToUndo(undoCommand);
     }
 
     public int quantity(){
